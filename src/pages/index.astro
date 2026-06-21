@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allQuestions = await getCollection('questions');
+const base = import.meta.env.BASE_URL;
+
+const categories = [
+  { id: 'technical-art', name: '技术美术基础', icon: '🎨', desc: 'TA 岗位认知、工作流、跨部门协作' },
+  { id: 'shader', name: 'Shader 编写', icon: '🌈', desc: 'HLSL/GLSL、Shader Graph、顶点/片元着色器' },
+  { id: 'rendering', name: '渲染管线', icon: '⚡', desc: 'Forward/Deferred/Forward+、PBR、光照模型' },
+  { id: 'optimization', name: '性能优化', icon: '🚀', desc: 'Draw Call、Overdraw、GPU Profiling、LOD' },
+  { id: 'pipeline', name: '工具与管线', icon: '🔧', desc: 'Houdini、Maya/Blender、自动化、资产规范' },
+  { id: 'soft-skills', name: '非技术面', icon: '🟢', desc: '团队协作、项目经验、作品集展示' },
+];
+
+const levelMap: Record<number, string> = { 1: '基础', 2: '进阶', 3: '架构', 4: '深度' };
+const levelCounts: Record<string, number> = {};
+for (const q of allQuestions) {
+  const key = `${levelMap[q.data.level]}`;
+  levelCounts[key] = (levelCounts[key] || 0) + 1;
+}
+
+const catCounts: Record<string, number> = {};
+for (const q of allQuestions) {
+  catCounts[q.data.category] = (catCounts[q.data.category] || 0) + 1;
+}
+---
+
+<BaseLayout title="首页">
+  <div class="hero">
+    <h1>🎨 技术美术（TA）面试指南</h1>
+    <p>
+      Shader · 渲染管线 · 性能优化 · 工具链 · PBR · 面向 TA 岗位全覆盖
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">{allQuestions.length}</div>
+        <div class="label">面试题</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">{categories.length}</div>
+        <div class="label">分类</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">4</div>
+        <div class="label">深度层级</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">📂 知识分类</div>
+  <div class="category-grid">
+    {categories.map((cat) => (
+      <a href={`${base}category/${cat.id}/`} class="category-card">
+        <div class="cat-icon">{cat.icon}</div>
+        <h3>{cat.name}</h3>
+        <div class="cat-desc">{cat.desc}</div>
+        <div class="cat-count">{catCounts[cat.id] || 0} 道题目</div>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
